@@ -10,55 +10,46 @@ export const config = {
   },
 };
 
-const saveFile = async (file, fields) => {
-  try {
-    const stream = fs.createReadStream(file.filepath);
-    const options = {
-      pinataMetadata: {
-        name: fields.name,
-        keyvalues: {
-          description: fields.description
-        }
+const keyRestrictions = {
+  keyName: 'Signed Upload JWT',
+  maxUses: 1,
+  permissions: {
+    endpoints: {
+      data: {
+        pinList: false,
+        userPinnedDataTotal: false
       },
-    };
-    const response = await pinata.pinFileToIPFS(stream, options);
-    fs.unlinkSync(file.filepath);
-    return response;
-  } catch (error) {
-    throw error;
+      pinning: {
+        pinFileToIPFS: true,
+        pinJSONToIPFS: false,
+        pinJobs: false,
+        unpin: false,
+        userPinPolicy: false
+      }
+    }
   }
 };
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
-      const form = new formidable.IncomingForm();
-      form.parse(req, async function (err, fields, files) {
-        if (err) {
-          console.log({ err });
-          return res.status(500).send("Upload Error");
-        }
-        const response = await saveFile(files.file, fields);
-        const { IpfsHash } = response;
-
-        return res.send(IpfsHash);
-      });
+      const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.PINATA_JWT}`
+        }, 
+        body: JSON.stringify(keyRestrictions)
+      };
+  
+      const jwtRepsonse = await fetch('https://api.pinata.cloud/users/generateApiKey', options);
+      const json = await jwtRepsonse.json();
+      const { JWT } = json;
+      res.send(JWT);
     } catch (e) {
       console.log(e);
       res.status(500).send("Server Error");
-    }
-  } else if (req.method === "GET") {
-    try {
-      const response = await pinata.pinList(
-        { pinataJWTKey: process.env.PINATA_JWT },
-        {
-          pageLimit: 1,
-        }
-      );
-      res.json(response.rows[0]);
-    } catch (e) {
-      console.log(e);
-      res.status(500).send("Server Error");
-    }
-  }
+    };
+  };
 }

@@ -15,7 +15,6 @@ export default function Home() {
     name: "",
     description: "",
   });
-
   const inputFile = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -24,27 +23,40 @@ export default function Home() {
     }
   };
 
-  const uploadFile = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!file) return;
-
+  const uploadFile = async (fileToUpload: File) => {
     try {
       setUploading(true);
+      const jwtRes = await fetch("/api/files", { method: "POST" });
+      const JWT = await jwtRes.text();
+      
       const formData = new FormData();
-      formData.append("file", file, file.name);
-      formData.append("name", form.name);
-      formData.append("description", form.description);
-      const res = await fetch("/api/files", {
-        method: "POST",
-        body: formData,
-      });
-      const ipfsHash = await res.text();
-      setCid(ipfsHash);
+      formData.append("file", fileToUpload, fileToUpload.name);
+  
+      const res = await fetch(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${JWT}`,
+          },
+          body: formData,
+        }
+      );
+      const json = await res.json();
+      const { IpfsHash } = json;
+      setCid(IpfsHash);
       setUploading(false);
     } catch (error) {
       console.log(error);
       setUploading(false);
       alert("Trouble uploading file");
+    }
+  };  
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (file) {
+      await uploadFile(file);
     }
   };
 
@@ -117,7 +129,7 @@ export default function Home() {
                   </button>
                 </div>
                 {file && (
-                  <form onSubmit={uploadFile}>
+                  <form onSubmit={(event) => uploadFile(event as any)}>
                     <div className="mb-2">
                       <label htmlFor="name">Name</label>
                       <br />
