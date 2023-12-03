@@ -23,7 +23,7 @@ export default function Home() {
     }
   };
 
-  const uploadFile = async (fileToUpload: File) => {
+  const uploadFile = async (fileToUpload: File) => {                                              
     try {
       setUploading(true);
       const jwtRes = await fetch("/api/files", { method: "POST" });
