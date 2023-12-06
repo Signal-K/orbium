@@ -1,6 +1,7 @@
 import { useState, useRef, ChangeEvent, FormEvent } from "react";
 import Head from "next/head";
 import Files from "@/components/Files";
+import PdfUpload from "@/components/PdfUpload";
 
 interface FormData {
   name: string;
@@ -97,6 +98,7 @@ export default function Home() {
                   onChange={handleChange}
                   style={{ display: "none" }}
                 />
+                <PdfUpload />
                 <div className="mt-8 flex flex-col items-center justify-center rounded-lg bg-light p-2 text-center text-secondary">
                   <button
                     disabled={uploading}

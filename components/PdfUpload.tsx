@@ -1,49 +1,50 @@
-import { InputWrapperWithErrorMessage } from "lib/ui/inputs/InputWrapper"
-import { useEffect } from "react"
-import { FileInput } from "lib/ui/inputs/FileInput"
-import { SelectedFile } from "lib/ui/inputs/SelectedFile"
-import { useUploadFileMutation } from "web3/hooks/useUploadFileMutation"
-import { getDistributedFileName } from "web3/utils/getDistributedFileName"
+import React, { useState } from 'react';
+import axios from 'axios';
+import UploadButton from './ui/UploadButton';
+import FileList from './FileList';
 
-interface Props {
-  value?: string
-  error?: string
-  onChange: (value?: string) => void
-}
+const PdfUpload: React.FC = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
-export const PdfFileInput = ({ value, error, onChange }: Props) => {
-  const {
-    mutate: uploadFile,
-    data: uploadedFileUri,
-    reset,
-    isLoading,
-  } = useUploadFileMutation()
+  const handleUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
 
-  useEffect(() => {
-    if (uploadedFileUri && !value) {
-      onChange(uploadedFileUri)
-      reset()
+    try {
+      const res = await axios.post(
+        'https://api.pinata.cloud/pinning/pinFileToIPFS',
+        formData,
+        {
+          maxContentLength: Infinity,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            pinata_api_key: process.env.API_KEY,
+            pinata_secret_api_key: process.env.API_SECRET,
+          },
+        }
+      );
+
+      const fileInfo = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        ipfsUrl: `ipfs://${res.data.IpfsHash}`,
+        timestamp: new Date().toISOString(),
+        // Additional metadata like description, uploader, etc.
+      };
+
+      setUploadedFiles([...uploadedFiles, fileInfo]);
+    } catch (error) {
+      console.error('Error uploading file to IPFS:', error);
     }
-  }, [onChange, reset, uploadedFileUri, value])
+  };
 
   return (
-    <InputWrapperWithErrorMessage label="Upload a file" error={error}>
-      {value ? (
-        <SelectedFile
-          name={getDistributedFileName(value)}
-          onRemove={() => onChange(undefined)}
-        />
-      ) : (
-        <FileInput
-          isLoading={isLoading}
-          onSubmit={(file) => {
-            uploadFile(file)
-          }}
-          accept={{
-            "application/pdf": [".pdf"],
-          }}
-        />
-      )}
-    </InputWrapperWithErrorMessage>
-  )
+    <div className="App">
+      <UploadButton onUpload={handleUpload} />
+      <FileList files={uploadedFiles} />
+    </div>
+  );
 };
+
+export default PdfUpload;
