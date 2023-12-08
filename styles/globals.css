@@ -1,51 +1,22 @@
-@font-face {
-  font-family: "Agrandir";
-  font-style: normal;
-  font-weight: 100 900;
-  src: url("../fonts/AgrandirVariable.woff2") format("woff2");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Inter", sans-serif;
 }
 
-@font-face {
-  font-family: "Telegraf";
-  font-style: normal;
-  font-weight: 100 900;
-  src: url("../fonts/TelegrafVariable.woff2") format("woff2");
+a {
+  color: #84309c;
+  text-decoration: none;
 }
-@tailwind base;
-@layer base {
-  :root {
-    --color-accent: #6d57ff;
-    --color-secondary: #8A79FF;
-    --color-light: #f6f6f6;
-    --color-dark: #000;
-    --color-grey: #eee;
-  }
 
-  html {
-    @apply p-0 m-0 scroll-smooth w-full h-full;
-  }
-
-  html body {
-    @apply m-0 h-screen w-full bg-light text-black font-telegraf;
-  }
-
-  h1, h2, h3, h4 {
-    @apply font-agrandir font-bold;
-  }
-  h1 {
-    @apply text-5xl;
-  }
-
-  a {
-    @apply text-black;
-  }
-
-  button {
-    @apply font-telegraf font-bold;
-  }
-
+* {
+  box-sizing: border-box;
 }
-@tailwind components;
-@tailwind utilities;
 
-
+body {
+  color: #e7e8e8;
+  background: #070707;
+}

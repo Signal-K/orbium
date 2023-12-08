@@ -1,39 +1,32 @@
 {
-  "name": "pinata-starter",
+  "name": "null",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export",
+    "deploy": "next build && next export && npx thirdweb@latest upload out"
   },
   "dependencies": {
-    "@pinata/sdk": "^2.1.0",
-    "api": "^6.1.1",
-    "axios": "^1.6.7",
-    "form-data": "^4.0.0",
-    "formidable": "^2.1.2",
-    "fs": "^0.0.1-security",
-    "ipfs-http-client": "^60.0.1",
-    "mime": "^4.0.1",
-    "next": "13.4.12",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "styles": "^0.2.1",
-    "web3": "^4.4.0"
+    "@supabase/auth-helpers-nextjs": "^0.9.0",
+    "@supabase/auth-helpers-react": "^0.4.2",
+    "@supabase/supabase-js": "^2.39.3",
+    "@thirdweb-dev/react": "^4",
+    "@thirdweb-dev/sdk": "^4",
+    "ethers": "^5",
+    "next": "^13",
+    "react": "^18.2",
+    "react-dom": "^18.2",
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
-    "@types/node": "20.5.1",
-    "@types/react": "18.2.20",
-    "autoprefixer": "^10.4.15",
-    "postcss": "^8.4.28",
-    "tailwindcss": "^3.3.3",
-    "typescript": "5.1.6"
-  },
-  "browser": {
-    "fs": false,
-    "path": false,
-    "os": false
+    "@types/node": "^18.11.11",
+    "@types/react": "^18",
+    "eslint": "^8.29.0",
+    "eslint-config-next": "^13",
+    "typescript": "^4.9.4"
   }
 }
