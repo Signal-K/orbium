@@ -1,74 +1,44 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { ConnectWallet, useStorageUpload, MediaRenderer } from "@thirdweb-dev/react";
-import { NextPage } from "next";
-import { useCallback, useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import React, { useEffect, useState } from "react";
+import CoreLayout from "../components/Core/Layout";
+import Layout from "../components/Section/Layout";
+import { useRouter } from "next/router";
+import Login from "./login";
 
-const IPFS_GATEWAY = "https://d4b4e2e663a6efce5f7f8310426ba24a.ipfscdn.io/ipfs/";
+import styles from '../styles/Landing.module.css';
+import { Metadata } from "next";
+import FileUpload from "../components/Content/FileUpload";
 
-const Home: NextPage = () => {
-  const supabase = useSupabaseClient();
-  const [uris, setUris] = useState<string[]>([]);
+export const metadata: Metadata = {
+  title: "Star Sailors"
+}
 
-  const { mutateAsync: upload } = useStorageUpload();
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      const _uris = await upload({ data: acceptedFiles });
-      await uploadAndAddToSupabase(acceptedFiles);
-      setUris(_uris);
-    },
-    [upload],
-  );
+export default function Home() {
+    const session = useSession();
+    const supabase = useSupabaseClient();
+    const router = useRouter();
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+    async function logoutUser () { 
+      const { error } = await supabase.auth.signOut() 
+    };
 
-  const uploadAndAddToSupabase = async (files: File[]) => {
-    try {
-      const uris = await upload({ data: files });
-      setUris(uris);
+    const userId = session?.user?.id;
 
-      // Add URIs to Supabase table
-      for (const uri of uris) {
-        await supabase.from("files").insert([{ file_url: uri }]);
-      }
-    } catch (error) {
-      console.error("Error uploading files and adding to Supabase:", error);
+    if (session) {
+    return (
+      <Layout>
+        {/* {userId} */}
+        <div className="flex flex-col gap-4">
+          <FileUpload />
+        </div>
+      </Layout>
+        // <CoreLayout>
+      )
     }
-  };
 
-  const fetchAndRenderFromSupabase = async () => {
-    try {
-      const { data, error } = await supabase.from("files").select("file_url");
-      if (error) {
-        console.error("Error fetching files from Supabase:", error.message);
-        return;
-      }
-      if (data) {
-        const urisFromSupabase = data.map((row: any) => row.file_url);
-        setUris(urisFromSupabase);
-      }
-    } catch (error: any) {
-      console.error("Error fetching files from Supabase:", error.message);
-    }
-  };
+    return (
+      <div className="grid grid-cols-2 h-screen-navbar">
 
-  useEffect(() => {
-    fetchAndRenderFromSupabase();
-  }, []);
-
-  return (
-    <div>
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        <button>Drop files to upload them to IPFS</button>
       </div>
-      <div>
-        {uris.map((uri) => (
-          <MediaRenderer key={uri} src={uri} alt="image" />
-        ))}
-      </div>
-    </div>
-  );
+    );
 };
-
-export default Home;
